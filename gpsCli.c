@@ -64,21 +64,21 @@ int main()
     *	fread(buffer,50,2,fp)  
     *	fread(buffer,1,100,fp)   
     *********************************************/
-    //从fp中读取1024个字节，每次读一个，存入buf
+    //从fp中读取一项数据，每项数据1024个字节，存入buf
     while((fileTrans = fread(buffer,sizeof(char),BUFFER_SIZE,fp))>0)
     {
-	sleep(1);  //注意这里
-	printf("times = %d   ",times);
-	times++;
-        //printf("fileTrans =%d\n",fileTrans);
-        if(sendto(sockcd,buffer,fileTrans,0,(struct sockaddr *)&server,addrlen)<0)
-        {
-            printf("send failed!\n");
-            break;      
-        }
-	else{
-	    printf("send successful!\n");
-	    printf("gps is : %s\n", buffer);
+		sleep(1);  //注意这里
+		printf("times = %d   ",times);
+		times++;
+			//printf("fileTrans =%d\n",fileTrans);
+			if(sendto(sockcd,buffer,fileTrans,0,(struct sockaddr *)&server,addrlen)<0)
+			{
+				printf("send failed!\n");
+				break;      
+			}
+		else{
+			printf("send successful!\n");
+			printf("gps is : %s\n", buffer);
 	}
 	if(fileTrans < BUFFER_SIZE) break;
         bzero(buffer,BUFFER_SIZE); 
