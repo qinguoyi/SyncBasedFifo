@@ -51,15 +51,25 @@ int main(int argc, char* argv[])
 		printf("%s\n", img);
 
 		FILE *fp;
+		//rb+以可读写的方式打开一个二进制文件
 		fp = fopen(img, "rb+");
+		
+		//fp文件流从文件结尾偏移0
 		fseek(fp, 0, SEEK_END);
+		
+		//用于得到文件位置指针当前位置相对于文件首的偏移字节数。
+		//先将指针移到文件尾，判断出文件的字节总长度
 		int fend = ftell(fp);
+		
+		//fp文件流从文件开始偏移0
 		fseek(fp, 0, 0);
 		int sendbytes, recvbytes;
 
 		while(fend > 0)
 		{
 			memset(picture.data, 0, sizeof(picture.data));
+			
+			//fread从流fp中读取1项二进制数据，存储到picture.data，每项数据1024个字节
 			fread(picture.data, 1024, 1, fp);
 			if(fend >= 1024) //还有剩余包未发送完
 			{
@@ -81,6 +91,7 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
+				//每次发送成功则将总长度减1024
 				fend -= 1024;  
 			}
 		}
