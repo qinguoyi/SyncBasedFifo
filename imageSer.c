@@ -31,7 +31,8 @@ void initImage(FILE**fp)
 
     char imgname[64];
     strftime(imgname, sizeof(imgname), "%Y%m%s%H%M%S.jpg", localtime(&t));
- 
+	
+	//以可写的方式打开一个二进制文件
     if(!(*fp = fopen(strcat(imgpath, imgname), "wb+")))
     {
         printf("Open image Failed!\n");
@@ -73,13 +74,15 @@ int main(int argc, char* argv[])
         FILE* fp;
         int flag = 1;
         picture.fin = 0;
- 
+		
+		//设置fin标志位，当发送端只有最后一个包的时候，fin = 1，此时表示接收完成
         while(!picture.fin)
         {
             memset(picture.data, 0, sizeof(picture.data));
             int recvbytes = recvfrom(sockfd, (char*)&picture, sizeof(struct Package),
                                      0, (struct sockaddr *)&addr, &addr_len);
- 
+			
+			//只执行一次，在最开始的时候打开文件
             if(flag)
             {
                 initImage(&fp);
@@ -88,23 +91,25 @@ int main(int argc, char* argv[])
  
             if(recvbytes == 0)
                 break;
- 
+			
+			//向文件中写入一项数据，每项数据的长度为length
             fwrite(picture.data, picture.length, 1, fp);
         }
- 	 //当图像端收到信息后，向gps端发送可接收命令
-	char buf[2];
-	memset(buf, 0, sizeof(buf));
-	sprintf(buf, "1");
-	write(fifo_fd, buf, strlen(buf));
+		
+		 //当图像端收到信息后，向gps端发送可接收命令
+		char buf[2];
+		memset(buf, 0, sizeof(buf));
+		sprintf(buf, "1");
+		write(fifo_fd, buf, strlen(buf));
 
-        /* 显示client端的网络地址和收到的字符串消息 */
-        //printf("Socket Server: IP: %s Connected!\n",  inet_ntoa(addr.sin_addr));
-        printf("Receive a picture. ip address: %s\n", inet_ntoa(addr.sin_addr));
- 
-        char sendbuffer[256] = "Server Response";
-        int sendbytes = sendto(sockfd, sendbuffer, sizeof(sendbuffer), 0, (struct sockaddr *)&addr, addr_len);
- 
-        fclose(fp); /*关闭fp，刷新缓冲区*/
+		/* 显示client端的网络地址和收到的字符串消息 */
+		//printf("Socket Server: IP: %s Connected!\n",  inet_ntoa(addr.sin_addr));
+		printf("Receive a picture. ip address: %s\n", inet_ntoa(addr.sin_addr));
+
+		char sendbuffer[256] = "Server Response";
+		int sendbytes = sendto(sockfd, sendbuffer, sizeof(sendbuffer), 0, (struct sockaddr *)&addr, addr_len);
+
+		fclose(fp); /*关闭fp，刷新缓冲区*/
     }
     close(sockfd);
     return 0;
